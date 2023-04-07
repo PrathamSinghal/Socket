@@ -16,10 +16,58 @@ let io = socketIO(server); // adding this to the server gives access to socket i
 
 io.on("connection",(socket) => {
     console.log("A new user just connected.");
+    
+    // now when somebody new is connected we are gonna send everybody else who is connected that this person is arrived.
+    // but new user should get that welcome to the chat from admin.
+    socket.emit("newMessage", {
+        from: "Admin",
+        text: "Welcome to the chat app!",
+        createdAt: new Date().getTime()
+    })
+
+    socket.broadcast.emit("newMessage", {
+        from: "Admin",
+        text: "New user Joined!",
+        createdAt: new Date().getTime()
+    })
+
+
+    socket.on("createMessage", (message) => {
+        console.log("Create Message", message);
+
+
+
+
+        io.emit('newMessage', {
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime()
+        })
+
+        // this broadcast to  everyone, even itself
+        // right now the message is getting to even to the person who sent.
+
+        // // now we broadcast to a single socket
+        // // this broadcast to everyone else except to the person who sent the message.
+        
+        // socket.broadcast.emit('newMessage', {
+        //     from: message.from,
+        //     text: message.text,
+        //     createdAt: new Date().getTime()
+        // })
+
+    })
 
     socket.on('disconnect', () => {
         console.log("User was disconnected");
     })
+
+    // socket.emit('newMessage', {
+    //     from: "Pratham Singh",
+    //     text: "This is sad",
+    // })
+
+    
 
 
 })  // it starts lintening to the event,.... it is pre-built
